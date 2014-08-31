@@ -89,6 +89,7 @@ for line in objModel:
 				QuadTex[-1][-1].append([])
 				Quads[-1][-1][-1] = int(line[i].split('/')[0]) - VertIndex	
 				QuadTex[-1][-1][-1] = int(line[i].split('/')[1]) - 1
+print (TriTex[1])
 
 try:
 	SRMfile = open(args.output, mode='wb')
@@ -98,7 +99,8 @@ except OSError:
 	# Dump back to command line
 	raise SystemExit
 
-	
+
+print ("We're going...", len(Vertices))
 for i in range(0, len(Vertices)): # Part No.
 	SRMfile.write(pack('l', len(Vertices[i]))) # Vertex length
 	for j in range(0, len(Vertices[i])):	# Write vertices

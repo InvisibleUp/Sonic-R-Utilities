@@ -36,8 +36,8 @@ parser.add_argument('model',
 	help='.BIN file containing model (usually XXX_h.bin)')
 parser.add_argument('output', nargs='?',
 	help='.BIN file to output to. (overwrites input if blank)')
-parser.add_argument('order', nargs='*',
-	help='Order of parts seperated by spaces. EX: "--order 3 1 2"')
+parser.add_argument('order', nargs='+',
+	help='Order of parts seperated by spaces. EX: "3 1 2". DO NOT type --order.')
 args = parser.parse_args()
 if args.output == None:
 	args.output = args.model

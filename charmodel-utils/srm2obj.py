@@ -186,7 +186,6 @@ for i in range(0, len(VertexCounts)): 	# Dimension 1: Groups
 			temp.append(SRM[filecounter+(j*0x10)+k])
 		temp = bytes(temp)
 		temp = unpack('HHHBBBBBB', temp)
-		print(temp[3:])
 		for h in range(0, 6):
 			Tris[-1][-1].append(temp[h])
 		for h in range(0, 6):
@@ -212,7 +211,6 @@ for i in range(0, len(VertexCounts)): 	# Dimension 1: Groups
 
 if args.silent == False:
 	print ("All points loaded.")
-	#print (TriTex)
 	print ()
 
 '''## Parsing Animation
@@ -301,13 +299,7 @@ for a in range(0, len(VertexCounts)):
 	Out += "s off\n"
 	
 	
-	#print(TriCounts[a])
 	for b in range(0, TriCounts[a]):
-		#print("\t",b)
-		#print(Tris[a][b])
-		if Tris[a][b] == []:
-			print ("No tris. (" , a , b , ")")
-			break
 		Out += "f "
 		Out += str(Tris[a][b][0] + VertIndex) + "/" +\
 			str(TexIndex) + " "
@@ -319,9 +311,6 @@ for a in range(0, len(VertexCounts)):
 		Out += "\n"
 	
 	for b in range(0, QuadCounts[a]):
-		if Quads[a][b] == []:
-			#print ("No quads. (", a , b , ")")
-			break
 		Out += "f "
 		Out += str(Quads[a][b][0] + VertIndex) + "/" +\
 			str(TexIndex) + " "
@@ -334,7 +323,6 @@ for a in range(0, len(VertexCounts)):
 		TexIndex += 4
 		Out += "\n"
 	VertIndex += VertexCounts[a]
-	#print(VertIndex)
 
 if args.output == "screen":
 	print (Out)
