@@ -19,9 +19,13 @@ noParts = 0
 ## Init
 #######################
 parser = argparse.ArgumentParser(
-	description='Reads Sonic R tracks and dumps info about them to the screen.')
+	description='Reads Sonic R tracks and dumps it to the screen.')
 parser.add_argument('model',
 	help='.BIN file containing track (usually XXX_h.bin)')
+#parser.add_argument('animation',
+#	help='.BIN file containing animation (usually XanX.bin)')
+#parser.add_argument('-f', metavar="FRAME", default=0, nargs='?', type=int,
+#	help='Frame # to render. Default 0')
 args = parser.parse_args()
 	
 # Load model
@@ -34,8 +38,10 @@ except OSError:
 	raise SystemExit
 
 ModelFileSize = os.stat(args.model).st_size
-if (ModelFileSize % 4 != 0):
-	print ("Bad model! (Size should be divisible by 4.)")
+#if args.silent == False:
+#	print ("Checking validity...")
+if (ModelFileSize % 2 != 0):
+	print ("Bad model! (Size should be divisible by 2.)")
 	raise SystemExit
 	
 SRT = array.array('B')
@@ -47,12 +53,12 @@ def readDword(filecounter):
 	temp = []
 	for k in range(0, 4):
 		temp.append(SRT[filecounter])
+		#print(temp, hex(filecounter))
 		filecounter += 1
-	#print(temp)
 	temp = bytes(temp)
-	temp = unpack('l', temp)
+	temp = unpack('L', temp)
 	temp = temp[0]
-	print(hex(filecounter - 4), temp)
+	print(hex(filecounter - 4), hex(temp))
 	return [filecounter, temp]
 	
 def readWord(filecounter):
@@ -60,14 +66,26 @@ def readWord(filecounter):
 	for k in range(0, 2):
 		temp.append(SRT[filecounter])
 		filecounter += 1
+	#print(temp)
 	temp = bytes(temp)
-	temp = unpack('h', temp)
+	temp = unpack('H', temp)
 	temp = temp[0]
-	print(hex(filecounter - 2), temp)
+	print(hex(filecounter - 2), hex(temp))
+	return [filecounter, temp]
+	
+def readByte(filecounter):
+	temp = []
+	temp.append(SRT[filecounter])
+	filecounter += 1
+	temp = bytes(temp)
+	temp = unpack('B', temp)
+	temp = temp[0]
+	print(hex(filecounter - 1), hex(temp))
 	return [filecounter, temp]
 
 temp = readDword(filecounter)
 filecounter = temp[0]
+#print(hex(temp[0]), "\t", hex(temp[1]))
 
 filecounter += (temp[-1] * 0x80) # Skip header/whatever
 
@@ -75,6 +93,7 @@ print ("No. of Track Parts:", end = "\t")
 temp = readDword(filecounter)
 filecounter = temp[0]
 noParts = temp[1]
+#print(hex(temp[0]), "\t", hex(temp[1]))
 
 for i in range(0, noParts):
 	print("\nPart no.", i+1)
@@ -91,6 +110,8 @@ for i in range(0, noParts):
 	temp = readDword(filecounter)
 	filecounter = temp[0]
 	noPoints = temp[1]
+	#print ("Unknown: ", end = "\t")
+	#filecounter = readDword(filecounter)[0]
 	
 	for j in range(0, noPoints):
 		print ("Point no.", j+1)
@@ -132,11 +153,11 @@ for i in range(0, noParts):
 		
 	temp = readDword(filecounter)
 	filecounter = temp[0]
-	if (temp[1] != -1):
+	if (temp[1] != 0xffffffff):
 		if (temp[1] != 0):
 			print ("That is incorrect, Master Belch.")
 			raise SystemExit
-		while(temp[1] != -1):
+		while(temp[1] != 0xffffffff):
 			temp = readDword(filecounter)
 			filecounter = temp[0]
 			
@@ -145,6 +166,114 @@ temp = readDword(filecounter)
 filecounter = temp[0]
 noParts = temp[1]
 
-# TODO: Research this.
+#raise SystemExit
 
-raise SystemExit
+#filecounter = 0x10bc
+
+for i in range(0, noParts):
+	print("\nPart no.", i+1)
+	
+	print ("Angle?: ", end = "\t")
+	filecounter = readDword(filecounter)[0]
+	filecounter = readDword(filecounter)[0]
+	filecounter = readDword(filecounter)[0]
+	filecounter = readDword(filecounter)[0]
+	
+	print ("X pos:  ", end = "\t")
+	filecounter = readDword(filecounter)[0]
+	print ("Y pos:  ", end = "\t")
+	filecounter = readDword(filecounter)[0]
+	print ("Z pos:  ", end = "\t")
+	filecounter = readDword(filecounter)[0]
+	
+	print ("Unk: ", end = "\t")
+	filecounter = readDword(filecounter)[0]
+	filecounter = readWord(filecounter)[0]
+	
+	print ("No. ???:", end = "\t")
+	temp = readDword(filecounter)
+	filecounter = temp[0]
+	noPoints = temp[1] #WHAT ARE THESE?
+	print (noPoints)
+	
+	#Fair sanity checking
+	if (noPoints < 0):
+		raise SystemExit
+	if (noPoints > 1000):
+		raise SystemExit
+		
+	for j in range(0, noPoints):
+		print ("??? no.", j+1)
+		
+		print ("A: ", end = "\t")
+		filecounter = readDword(filecounter)[0]
+		print ("B: ", end = "\t")
+		filecounter = readDword(filecounter)[0]
+		print ("C: ", end = "\t")
+		filecounter = readDword(filecounter)[0]
+		print ("D: ", end = "\t")
+		filecounter = readDword(filecounter)[0]
+		
+		
+	print ("No. Quads:", end = "\t")
+	temp = readDword(filecounter)
+	filecounter = temp[0]
+	noPoints = temp[1] #They're not points, but eh
+	print (noPoints)
+	
+	#Fair sanity checking
+	if (noPoints < 0):
+		raise SystemExit
+	if (noPoints > 1000):
+		raise SystemExit
+		
+	for j in range(0, noPoints):
+		print ("Face no.", j+1)
+		
+		print ("A: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("B: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("C: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("D: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("TA: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("TB: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("TC: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("TD: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("Tex Page: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("Unknown: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		
+	print ("No. Vertices:", end = "\t")
+	temp = readWord(filecounter)
+	filecounter = temp[0]
+	noPoints = temp[1]
+	
+	if (noPoints < 0):
+		raise SystemExit
+	if (noPoints > 1000):
+		raise SystemExit
+	
+	for j in range(0, noPoints):
+		print ("Point no.", j+1)
+		
+		print ("Unk: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("X: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("Y: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("Z: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("Unk: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+	print ("Unk: ", end = "\t")
+	filecounter = readWord(filecounter)[0]
+		
