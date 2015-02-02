@@ -54,7 +54,14 @@ def readByte(filecounter):
 # Storage for coordinates	
 TrackPart = []
 TrackPartTex = []
-DecoPart = []
+TrackTexPage = []
+
+DecoPartVtx = []
+DecoPartFace = []
+DecoPartTri = []
+DecoQuadTex = []
+DecoTriTex = []
+DecoTexPage = []
 filecounter = 0;
 
 ## Init
@@ -102,7 +109,7 @@ temp = readDword(filecounter)
 filecounter = temp[0]
 filecounter += (temp[-1] * 0x80)
 
-print ("No. of Track Parts:", end = "\t")
+print ("No. of Track Parts:", end = " ")
 temp = readDword(filecounter)
 filecounter = temp[0]
 noParts = temp[1]
@@ -112,6 +119,7 @@ print (noParts, hex(filecounter-4))
 for i in range(0, noParts):
 	TrackPart.append([])
 	TrackPartTex.append([])
+	TrackTexPage.append([])
 #	print("\nPart no.", i+1)
 	
 #	print ("X pos:  ", end = "\t")
@@ -168,27 +176,49 @@ for i in range(0, noParts):
 #		print ("Face no.", j+1, hex(filecounter))
 		
 #		print ("Tex Page: ", end = "\t")
-		## NOTE: We NEED this. Figure that out.
-		filecounter = readWord(filecounter)[0]
+		temp = readWord(filecounter)
+		filecounter = temp[0]
+		TrackTexPage[-1].append(temp[1])
+
 		
 #		print ("TL: ", end = "\t")
-		temp = readWord(filecounter)
-		filecounter = temp[0]
-		TrackPartTex[-1].append(temp[1])
-#		print ("BL: ", end = "\t")
-		temp = readWord(filecounter)
-		filecounter = temp[0]
-		TrackPartTex[-1].append(temp[1])	
-#		print ("TR: ", end = "\t")
-		temp = readWord(filecounter)
-		filecounter = temp[0]
-		TrackPartTex[-1].append(temp[1])
-#		print ("BR: ", end = "\t")
-		temp = readWord(filecounter)
+		temp = readByte(filecounter)
 		filecounter = temp[0]
 		TrackPartTex[-1].append(temp[1])
 		
-#		print ("??: ", end = "\t")
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		TrackPartTex[-1].append(abs(temp[1] - 255))
+		
+		
+#		print ("BL: ", end = "\t")
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		TrackPartTex[-1].append(temp[1])
+		
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		TrackPartTex[-1].append(abs(temp[1] - 255))
+		
+#		print ("TR: ", end = "\t")
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		TrackPartTex[-1].append(temp[1])
+		
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		TrackPartTex[-1].append(abs(temp[1] - 255))
+		
+#		print ("BR: ", end = "\t")
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		TrackPartTex[-1].append(temp[1])
+		
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		TrackPartTex[-1].append(abs(temp[1] - 255))
+		
+#		print ("???", end = "\t")
 		filecounter = readWord(filecounter)[0]
 		
 	temp = readDword(filecounter)
@@ -200,67 +230,117 @@ for i in range(0, noParts):
 		while(temp[1] != -1):
 			temp = readDword(filecounter)
 			filecounter = temp[0]
-## Let's skip this for now. Sorry. :/
-'''			
-print ("\nNo. of Decoration Parts:", end = "\t")
+
+		
+print ("No. of Decoration Parts:", end = " ")
 temp = readDword(filecounter)
 filecounter = temp[0]
 noParts = temp[1]
+print (noParts, hex(filecounter-4))
 
 #raise SystemExit
 
 #filecounter = 0x10bc
 
 for i in range(0, noParts):
-	print("\nPart no.", i+1)
+	DecoPartVtx.append([])
+	DecoPartFace.append([])
+	DecoPartTri.append([])
+	DecoTriTex.append([])
+	DecoQuadTex.append([])
+	DecoTexPage.append([])
+#	print("\nPart no.", i+1, hex(filecounter))
 	
-	print ("Angle?: ", end = "\t")
+#	print ("Angle?: ")
 	filecounter = readDword(filecounter)[0]
 	filecounter = readDword(filecounter)[0]
 	filecounter = readDword(filecounter)[0]
 	filecounter = readDword(filecounter)[0]
 	
-	print ("X pos:  ", end = "\t")
-	filecounter = readDword(filecounter)[0]
-	print ("Y pos:  ", end = "\t")
-	filecounter = readDword(filecounter)[0]
-	print ("Z pos:  ", end = "\t")
-	filecounter = readDword(filecounter)[0]
+#	print ("X pos:  ")
+	temp = readDword(filecounter)
+	filecounter = temp[0]
+	AddX = temp[1]
+#	print ("Y pos:  ")
+	temp = readDword(filecounter)
+	filecounter = temp[0]
+	AddX = temp[1]
+#	print ("Z pos:  ")
+	temp = readDword(filecounter)
+	filecounter = temp[0]
+	AddX = temp[1]
 	
-	print ("Unk: ", end = "\t")
+#	print ("Unk: ")
 	filecounter = readDword(filecounter)[0]
 	filecounter = readWord(filecounter)[0]
 	
-	print ("No. ???:", end = "\t")
+#	print ("No. ???:")
 	temp = readDword(filecounter)
 	filecounter = temp[0]
-	noPoints = temp[1] #WHAT ARE THESE?
-	print (noPoints)
+	noPoints = temp[1]
+#	print (noPoints)
 	
 	#Fair sanity checking
 	if (noPoints < 0):
+		print ("This part has an unreasonable number of points. (<0) File may be corrupt. Exiting!")
 		raise SystemExit
-	if (noPoints > 1000):
+	if (noPoints > 2000):
+		print ("This part has an unreasonable number of points. (>2000) File may be corrupt. Exiting!")
 		raise SystemExit
 		
 	for j in range(0, noPoints):
-		print ("??? no.", j+1)
+#		print ("\n??? no.", j+1) ## Triangles. Triangles. Why'd it have to be triangles?
 		
-		print ("A: ", end = "\t")
-		filecounter = readDword(filecounter)[0]
-		print ("B: ", end = "\t")
-		filecounter = readDword(filecounter)[0]
-		print ("C: ", end = "\t")
-		filecounter = readDword(filecounter)[0]
-		print ("D: ", end = "\t")
-		filecounter = readDword(filecounter)[0]
+#		print ("A: ", end = "")  
+		temp = readWord(filecounter)
+		filecounter = temp[0]
+		DecoPartTri[-1].append(temp[1])
+		
+#		print ("B: ", end = "")
+		temp = readWord(filecounter)
+		filecounter = temp[0]
+		DecoPartTri[-1].append(temp[1])
+		
+#		print ("C: ", end = "")
+		temp = readWord(filecounter)
+		filecounter = temp[0]
+		DecoPartTri[-1].append(temp[1])
+
+#		print ("TA: ", end = "") 		
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoTriTex[-1].append(temp[1])
+		
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoTriTex[-1].append(abs(temp[1] - 255))
+#		print ("TB: ", end = "") 
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoTriTex[-1].append(temp[1])
+		
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoTriTex[-1].append(abs(temp[1] - 255))
+#		print ("TC: ", end = "") 
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoTriTex[-1].append(temp[1])
+		
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoTriTex[-1].append(abs(temp[1] - 255))
+#		print ("Tex. Page: ", end = "")
+		temp = readDword(filecounter)
+		filecounter = temp[0]
+#		print(temp[1], end="\t")
 		
 		
-	print ("No. Quads:", end = "\t")
+#	print ("No. Quads:", end = "\t")
 	temp = readDword(filecounter)
 	filecounter = temp[0]
 	noPoints = temp[1] #They're not points, but eh
-	print (noPoints)
+#	print (noPoints)
 	
 	#Fair sanity checking
 	if (noPoints < 0):
@@ -269,33 +349,69 @@ for i in range(0, noParts):
 		raise SystemExit
 		
 	for j in range(0, noPoints):
-		print ("Face no.", j+1)
+#		print ("Face no.", j+1, hex(filecounter))
 		
-		print ("A: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
-		print ("B: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
-		print ("C: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
-		print ("D: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
-		print ("TA: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
-		print ("TB: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
-		print ("TC: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
-		print ("TD: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
-		print ("Tex Page: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
-		print ("Unknown: ", end = "\t")
+#		print ("A: ", end = "\t") ## Vtx no.
+		temp = readWord(filecounter)
+		filecounter = temp[0]
+		DecoPartFace[-1].append(temp[1])
+#		print ("B: ", end = "\t")
+		temp = readWord(filecounter)
+		filecounter = temp[0]
+		DecoPartFace[-1].append(temp[1])
+#		print ("C: ", end = "\t")
+		temp = readWord(filecounter)
+		filecounter = temp[0]
+		DecoPartFace[-1].append(temp[1])
+#		print ("D: ", end = "\t")
+		temp = readWord(filecounter)
+		filecounter = temp[0]
+		DecoPartFace[-1].append(temp[1])
+		
+#		print ("TA: ", end = "\t")
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoQuadTex[-1].append(temp[1])
+		
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoQuadTex[-1].append(abs(temp[1] - 255))
+#		print ("TB: ", end = "\t")
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoQuadTex[-1].append(temp[1])
+		
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoQuadTex[-1].append(abs(temp[1] - 255))
+#		print ("TC: ", end = "\t")
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoQuadTex[-1].append(temp[1])
+		
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoQuadTex[-1].append(abs(temp[1] - 255))
+#		print ("TD: ", end = "\t")
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoQuadTex[-1].append(temp[1])
+		
+		temp = readByte(filecounter)
+		filecounter = temp[0]
+		DecoQuadTex[-1].append(abs(temp[1] - 255))
+#		print ("Tex Page: ", end = "\t")
+		temp = readWord(filecounter)
+		filecounter = temp[0]
+		DecoTexPage[-1].append(abs(temp[1]))
+#		print ("Unknown: ", end = "\t")
 		filecounter = readWord(filecounter)[0]
 		
-	print ("No. Vertices:", end = "\t")
+#	print ("No. Vertices:", end = "\t")
 	temp = readWord(filecounter)
 	filecounter = temp[0]
 	noPoints = temp[1]
+#	print (noPoints)
 	
 	if (noPoints < 0):
 		raise SystemExit
@@ -303,31 +419,43 @@ for i in range(0, noParts):
 		raise SystemExit
 	
 	for j in range(0, noPoints):
-		print ("Point no.", j+1)
+#		print ("Point no.", j+1, hex(filecounter))
 		
-		print ("Unk: ", end = "\t")
+#		print ("Unk: ", end = "\t")
 		filecounter = readWord(filecounter)[0]
-		print ("X: ", end = "\t")
+		
+#		print ("X: ", end = "\t")
+		temp = readWord(filecounter)
+		filecounter = temp[0]
+		DecoPartVtx[-1].append(temp[1])
+#		print ("Y: ", end = "\t")
+		temp = readWord(filecounter)
+		filecounter = temp[0]
+		DecoPartVtx[-1].append(temp[1])
+#		print ("Z: ", end = "\t")
+		temp = readWord(filecounter)
+		filecounter = temp[0]
+		DecoPartVtx[-1].append(temp[1])
+		
+#		print ("Unk: ", end = "\t")
 		filecounter = readWord(filecounter)[0]
-		print ("Y: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
-		print ("Z: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
-		print ("Unk: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
-	print ("Unk: ", end = "\t")
+#	print ("Unk: ", end = "\t")
 	filecounter = readWord(filecounter)[0]
-'''
+	
 ## Convert
 #######################
 Out = "" 	# The string where we dump everything.
 VertIndex = 1
 TexIndex = 1
-Out += "# srt2obj v0.1\n\n"
+CurrentTex = -1 # Purposefully invalid
+PageIndex = 0
+Out += "# srt2obj v0.1\nmtllib track.mtl\nusemtl 0\n"
+
+## Track Parts
 
 for a in range(0, len(TrackPart)):
 #	print(a, TrackPart[a], len(TrackPart[a]), len(TrackPart[a])%4, "\n")
-	Out += "\no Grp" + str(a) + "\n" 	# Start the group
+	Out += "\no Trk" + str(a) + "\n" 	# Start the group
 	for b in range(0, len(TrackPart[a]), 3):
 		#print ("\t", b)
 		Out += "v "
@@ -336,22 +464,83 @@ for a in range(0, len(TrackPart)):
 		Out += str(TrackPart[a][b+2] / 100) + " "
 		Out += "\n"
 		
-##	Out += "usemtl Texture\n"
-##	Out += "s off\n"
+	for b in range(0, len(TrackPartTex[a]), 2):
+		#print ("\t", b)
+		Out += "vt "
+		Out += str(TrackPartTex[a][b] / 256) + " "
+		Out += str(TrackPartTex[a][b+1] / 256) + " " 
+		Out += "\n"
+		
+#	Out += "usemtl Texture\n"
 	
 	
 	for b in range(0, (len(TrackPart[a]) // 3)-2, 2):
+		if (CurrentTex != TrackTexPage[a][PageIndex]):
+			CurrentTex = TrackTexPage[a][PageIndex]
+			Out += "usemtl " + str(CurrentTex) + "\n"
 		Out += "f "
-		Out += str(b+1 + VertIndex) + " "
-		Out += str(b + VertIndex) + " "
-		Out += str(b+2 + VertIndex) + " "
-		Out += str(b+3 + VertIndex)
-##		TexIndex += 4
+		Out += str(b+1 + VertIndex) + "/" + str(3 + TexIndex) + " "
+		Out += str(b + VertIndex) + "/" + str(TexIndex) + " "
+		Out += str(b+2 + VertIndex) + "/" + str(1 + TexIndex) + " "
+		Out += str(b+3 + VertIndex) + "/" + str(2 + TexIndex)
 		Out += "\n"
+		TexIndex += 4
+		PageIndex += 1
 	VertIndex += len(TrackPart[a]) // 3
+	PageIndex = 0
+	
+## Decoration Parts
 
-##if args.output == "screen":
-#	print (Out)
+for a in range(0, len(DecoPartVtx)):
+	Out += "\no Dec" + str(a) + "\n" 	# Start the group
+#	print (a, len(DecoPartVtx[a]))
+	for b in range(0, len(DecoPartVtx[a]), 3):
+#		print ("\t", b)
+		Out += "v "
+		Out += str(DecoPartVtx[a][b] / 100) + " "
+		Out += str(DecoPartVtx[a][b+1] / 100) + " " 
+		Out += str(DecoPartVtx[a][b+2] / 100) + " "
+		Out += "\n"
+		
+	for b in range(0, len(DecoQuadTex[a]), 2):
+		#print ("\t", b)
+		Out += "vt "
+		Out += str(DecoQuadTex[a][b] / 256) + " "
+		Out += str(DecoQuadTex[a][b+1] / 256) + " " 
+		Out += "\n"
+	for b in range(0, len(DecoTriTex[a]), 2):
+		#print ("\t", b)
+		Out += "vt "
+		Out += str(DecoTriTex[a][b] / 256) + " "
+		Out += str(DecoTriTex[a][b+1] / 256) + " " 
+		Out += "\n"
+		
+	for b in range(0, len(DecoPartFace[a]), 4):
+		if (CurrentTex != DecoTexPage[a][PageIndex]):
+			print(DecoTexPage[a])
+			CurrentTex = DecoTexPage[a][PageIndex]
+			Out += "usemtl " + str(CurrentTex) + "\n"
+		Out += "f "
+		Out += str(DecoPartFace[a][b] + VertIndex) + "/" + str(TexIndex) + " "
+		Out += str(DecoPartFace[a][b+1] + VertIndex) + "/" + str(TexIndex + 1) + " "
+		Out += str(DecoPartFace[a][b+2] + VertIndex) + "/" + str(TexIndex + 2) + " "
+		Out += str(DecoPartFace[a][b+3] + VertIndex) + "/" + str(TexIndex + 3)
+		TexIndex += 4
+		Out += "\n"
+	for b in range(0, len(DecoPartTri[a]), 3):
+		if (CurrentTex != DecoTexPage[a][PageIndex]):
+			CurrentTex = DecoTexPage[a][PageIndex]
+			Out += "usemtl " + str(CurrentTex) + "\n"
+		Out += "f "
+		Out += str(DecoPartTri[a][b] + VertIndex) + "/" + str(TexIndex) + " "
+		Out += str(DecoPartTri[a][b+1] + VertIndex) + "/" + str(TexIndex+1) + " "
+		Out += str(DecoPartTri[a][b+2] + VertIndex) + "/" + str(TexIndex+2) + " "
+		TexIndex += 3
+		Out += "\n"
+	PageIndex += 0	
+	VertIndex += len(DecoPartVtx[a]) // 3
+if args.output == "screen":
+	print (Out)
 else:
 	objFile = open(args.output, mode='w')
 	objFile.write(Out)
