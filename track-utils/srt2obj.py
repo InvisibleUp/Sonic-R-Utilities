@@ -289,12 +289,13 @@ for i in range(0, noParts):
 		raise SystemExit
 		
 	for j in range(0, noPoints):
-#		print ("\n??? no.", j+1) ## Triangles. Triangles. Why'd it have to be triangles?
+#		print ("\nTri no.", j+1) ## Triangles. Triangles. Why'd it have to be triangles?
 		
-#		print ("A: ", end = "")  
+		#print ("A: ", end = "")  
 		temp = readWord(filecounter)
 		filecounter = temp[0]
 		DecoPartTri[-1].append(temp[1])
+		#print (temp[1])
 		
 #		print ("B: ", end = "")
 		temp = readWord(filecounter)
@@ -330,10 +331,11 @@ for i in range(0, noParts):
 		temp = readByte(filecounter)
 		filecounter = temp[0]
 		DecoTriTex[-1].append(abs(temp[1] - 255))
-#		print ("Tex. Page: ", end = "")
+		#print ("Tex. Page: ", end = "")
 		temp = readDword(filecounter)
 		filecounter = temp[0]
-#		print(temp[1], end="\t")
+		DecoTexPage[-1].append(temp[1])
+		#print(temp[1], end="\t")
 		
 		
 #	print ("No. Quads:", end = "\t")
@@ -517,7 +519,7 @@ for a in range(0, len(DecoPartVtx)):
 		
 	for b in range(0, len(DecoPartFace[a]), 4):
 		if (CurrentTex != DecoTexPage[a][PageIndex]):
-			print(DecoTexPage[a])
+			#print(a, DecoTexPage[a])
 			CurrentTex = DecoTexPage[a][PageIndex]
 			Out += "usemtl " + str(CurrentTex) + "\n"
 		Out += "f "
@@ -528,6 +530,7 @@ for a in range(0, len(DecoPartVtx)):
 		TexIndex += 4
 		Out += "\n"
 	for b in range(0, len(DecoPartTri[a]), 3):
+		#print(len(DecoPartTri[a]))
 		if (CurrentTex != DecoTexPage[a][PageIndex]):
 			CurrentTex = DecoTexPage[a][PageIndex]
 			Out += "usemtl " + str(CurrentTex) + "\n"
