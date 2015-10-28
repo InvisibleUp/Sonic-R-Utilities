@@ -1,7 +1,7 @@
 ##############################################################################
 ##                                                                          ##
 ## SRT2OBJ - Sonic R Track Converter (vanilla)                              ##
-## (c) InvisibleUp 2014                                                     ##
+## (c) InvisibleUp 2014-2015                                                ##
 ##                                                                          ##
 ##############################################################################
 ## NOTE: Does not support track tinting. That's... kinda vital. Eh.
@@ -61,7 +61,8 @@ DecoPartFace = []
 DecoPartTri = []
 DecoQuadTex = []
 DecoTriTex = []
-DecoTexPage = []
+DecoTriTexPage = []
+DecoQuadTexPage = []
 filecounter = 0;
 
 ## Init
@@ -238,17 +239,14 @@ filecounter = temp[0]
 noParts = temp[1]
 print (noParts, hex(filecounter-4))
 
-#raise SystemExit
-
-#filecounter = 0x10bc
-
 for i in range(0, noParts):
 	DecoPartVtx.append([])
 	DecoPartFace.append([])
 	DecoPartTri.append([])
 	DecoTriTex.append([])
 	DecoQuadTex.append([])
-	DecoTexPage.append([])
+	DecoTriTexPage.append([])
+	DecoQuadTexPage.append([])
 #	print("\nPart no.", i+1, hex(filecounter))
 	
 #	print ("Angle?: ")
@@ -264,11 +262,11 @@ for i in range(0, noParts):
 #	print ("Y pos:  ")
 	temp = readDword(filecounter)
 	filecounter = temp[0]
-	AddX = temp[1]
+	AddY = temp[1]
 #	print ("Z pos:  ")
 	temp = readDword(filecounter)
 	filecounter = temp[0]
-	AddX = temp[1]
+	AddZ = temp[1]
 	
 #	print ("Unk: ")
 	filecounter = readDword(filecounter)[0]
@@ -284,18 +282,18 @@ for i in range(0, noParts):
 	if (noPoints < 0):
 		print ("This part has an unreasonable number of points. (<0) File may be corrupt. Exiting!")
 		raise SystemExit
-	if (noPoints > 2000):
-		print ("This part has an unreasonable number of points. (>2000) File may be corrupt. Exiting!")
+	if (noPoints > 10000):
+		print ("This part has an unreasonable number of points. (>10000) File may be corrupt. Exiting!")
 		raise SystemExit
 		
 	for j in range(0, noPoints):
 #		print ("\nTri no.", j+1) ## Triangles. Triangles. Why'd it have to be triangles?
 		
-		#print ("A: ", end = "")  
+#		print ("A: ", end = "")  
 		temp = readWord(filecounter)
 		filecounter = temp[0]
 		DecoPartTri[-1].append(temp[1])
-		#print (temp[1])
+#		print (temp[1])
 		
 #		print ("B: ", end = "")
 		temp = readWord(filecounter)
@@ -331,11 +329,11 @@ for i in range(0, noParts):
 		temp = readByte(filecounter)
 		filecounter = temp[0]
 		DecoTriTex[-1].append(abs(temp[1] - 255))
-		#print ("Tex. Page: ", end = "")
+#		print ("Tex. Page: ", end = "")
 		temp = readDword(filecounter)
 		filecounter = temp[0]
-		DecoTexPage[-1].append(temp[1])
-		#print(temp[1], end="\t")
+		DecoTriTexPage[-1].append(temp[1])
+#		print(temp[1], end="\t")
 		
 		
 #	print ("No. Quads:", end = "\t")
@@ -351,7 +349,7 @@ for i in range(0, noParts):
 		raise SystemExit
 		
 	for j in range(0, noPoints):
-#		print ("Face no.", j+1, hex(filecounter))
+#		print ("Face no.", j+1, hex(filecounter), end="\t")
 		
 #		print ("A: ", end = "\t") ## Vtx no.
 		temp = readWord(filecounter)
@@ -405,7 +403,8 @@ for i in range(0, noParts):
 #		print ("Tex Page: ", end = "\t")
 		temp = readWord(filecounter)
 		filecounter = temp[0]
-		DecoTexPage[-1].append(abs(temp[1]))
+		DecoQuadTexPage[-1].append(temp[1])
+#		print(temp[1])
 #		print ("Unknown: ", end = "\t")
 		filecounter = readWord(filecounter)[0]
 		
@@ -429,15 +428,15 @@ for i in range(0, noParts):
 #		print ("X: ", end = "\t")
 		temp = readWord(filecounter)
 		filecounter = temp[0]
-		DecoPartVtx[-1].append(temp[1])
+		DecoPartVtx[-1].append(temp[1]+AddX)
 #		print ("Y: ", end = "\t")
 		temp = readWord(filecounter)
 		filecounter = temp[0]
-		DecoPartVtx[-1].append(temp[1])
+		DecoPartVtx[-1].append(temp[1]+AddY)
 #		print ("Z: ", end = "\t")
 		temp = readWord(filecounter)
 		filecounter = temp[0]
-		DecoPartVtx[-1].append(temp[1])
+		DecoPartVtx[-1].append(temp[1]+AddZ)
 		
 #		print ("Unk: ", end = "\t")
 		filecounter = readWord(filecounter)[0]
@@ -450,7 +449,6 @@ Out = "" 	# The string where we dump everything.
 VertIndex = 1
 TexIndex = 1
 CurrentTex = -1 # Purposefully invalid
-PageIndex = 0
 Out += "# srt2obj v0.1\nmtllib track.mtl\nusemtl 0\n"
 
 ## Track Parts
@@ -471,14 +469,11 @@ for a in range(0, len(TrackPart)):
 		Out += "vt "
 		Out += str(TrackPartTex[a][b] / 256) + " "
 		Out += str(TrackPartTex[a][b+1] / 256) + " " 
-		Out += "\n"
-		
-#	Out += "usemtl Texture\n"
-	
+		Out += "\n"	
 	
 	for b in range(0, (len(TrackPart[a]) // 3)-2, 2):
-		if (CurrentTex != TrackTexPage[a][PageIndex]):
-			CurrentTex = TrackTexPage[a][PageIndex]
+		if (CurrentTex != TrackTexPage[a][b//2]):
+			CurrentTex = TrackTexPage[a][b//2]
 			Out += "usemtl " + str(CurrentTex) + "\n"
 		Out += "f "
 		Out += str(b+1 + VertIndex) + "/" + str(3 + TexIndex) + " "
@@ -487,9 +482,7 @@ for a in range(0, len(TrackPart)):
 		Out += str(b+3 + VertIndex) + "/" + str(2 + TexIndex)
 		Out += "\n"
 		TexIndex += 4
-		PageIndex += 1
 	VertIndex += len(TrackPart[a]) // 3
-	PageIndex = 0
 	
 ## Decoration Parts
 
@@ -516,12 +509,13 @@ for a in range(0, len(DecoPartVtx)):
 		Out += str(DecoTriTex[a][b] / 256) + " "
 		Out += str(DecoTriTex[a][b+1] / 256) + " " 
 		Out += "\n"
-		
+	
+	TexPageIndex = 0
 	for b in range(0, len(DecoPartFace[a]), 4):
-		if (CurrentTex != DecoTexPage[a][PageIndex]):
-			#print(a, DecoTexPage[a])
-			CurrentTex = DecoTexPage[a][PageIndex]
+		if (CurrentTex != DecoQuadTexPage[a][b//4]):
+			CurrentTex = DecoQuadTexPage[a][b//4]
 			Out += "usemtl " + str(CurrentTex) + "\n"
+		TexPageIndex += 1
 		Out += "f "
 		Out += str(DecoPartFace[a][b] + VertIndex) + "/" + str(TexIndex) + " "
 		Out += str(DecoPartFace[a][b+1] + VertIndex) + "/" + str(TexIndex + 1) + " "
@@ -529,10 +523,10 @@ for a in range(0, len(DecoPartVtx)):
 		Out += str(DecoPartFace[a][b+3] + VertIndex) + "/" + str(TexIndex + 3)
 		TexIndex += 4
 		Out += "\n"
+		
 	for b in range(0, len(DecoPartTri[a]), 3):
-		#print(len(DecoPartTri[a]))
-		if (CurrentTex != DecoTexPage[a][PageIndex]):
-			CurrentTex = DecoTexPage[a][PageIndex]
+		if (CurrentTex != DecoTriTexPage[a][b//3]):
+			CurrentTex = DecoTriTexPage[a][b//3]
 			Out += "usemtl " + str(CurrentTex) + "\n"
 		Out += "f "
 		Out += str(DecoPartTri[a][b] + VertIndex) + "/" + str(TexIndex) + " "
@@ -540,7 +534,7 @@ for a in range(0, len(DecoPartVtx)):
 		Out += str(DecoPartTri[a][b+2] + VertIndex) + "/" + str(TexIndex+2) + " "
 		TexIndex += 3
 		Out += "\n"
-	PageIndex += 0	
+	
 	VertIndex += len(DecoPartVtx[a]) // 3
 if args.output == "screen":
 	print (Out)
