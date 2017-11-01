@@ -1,7 +1,7 @@
 ##############################################################################
 ##                                                                          ##
 ## SRTREAD - Sonic R Track Parser                                           ##
-## (c) InvisibleUp 2014                                                     ##
+## (c) InvisibleUp 2014-2017                                                ##
 ##                                                                          ##
 ##############################################################################
 import os.path
@@ -140,13 +140,13 @@ for i in range(0, noParts):
 		
 		print ("Tex Page: ", end = "\t")
 		filecounter = readWord(filecounter)[0]
-		print ("TL: ", end = "\t")
+		print ("TopLeft: ", end = "\t")
 		filecounter = readWord(filecounter)[0]
-		print ("BL: ", end = "\t")
+		print ("BottomLeft: ", end = "\t")
 		filecounter = readWord(filecounter)[0]		
-		print ("TR: ", end = "\t")
+		print ("TopRight: ", end = "\t")
 		filecounter = readWord(filecounter)[0]
-		print ("BR: ", end = "\t")
+		print ("BottomRight: ", end = "\t")
 		filecounter = readWord(filecounter)[0]
 		print ("??: ", end = "\t")
 		filecounter = readWord(filecounter)[0]
@@ -190,7 +190,7 @@ for i in range(0, noParts):
 	filecounter = readDword(filecounter)[0]
 	filecounter = readWord(filecounter)[0]
 	
-	print ("No. ???:", end = "\t")
+	print ("No. Triangles:", end = "\t")
 	temp = readDword(filecounter)
 	filecounter = temp[0]
 	noPoints = temp[1] #WHAT ARE THESE?
@@ -198,20 +198,29 @@ for i in range(0, noParts):
 	
 	#Fair sanity checking
 	if (noPoints < 0):
+		print ("This part has an unreasonable number of points. (<0) File may be corrupt. Exiting!")
 		raise SystemExit
-	if (noPoints > 1000):
+	if (noPoints > 2000):
+		print ("This part has an unreasonable number of points. (>2000) File may be corrupt. Exiting!")
 		raise SystemExit
 		
 	for j in range(0, noPoints):
-		print ("??? no.", j+1)
+        print ("Tri no.", j+1)
 		
 		print ("A: ", end = "\t")
-		filecounter = readDword(filecounter)[0]
+		filecounter = readWord(filecounter)[0]
 		print ("B: ", end = "\t")
-		filecounter = readDword(filecounter)[0]
+		filecounter = readWord(filecounter)[0]
 		print ("C: ", end = "\t")
-		filecounter = readDword(filecounter)[0]
-		print ("D: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		
+		print ("TA: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("TB: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("TC: ", end = "\t")
+		filecounter = readWord(filecounter)[0]
+		print ("Tex. Page: ", end = "\t")
 		filecounter = readDword(filecounter)[0]
 		
 		
@@ -223,8 +232,10 @@ for i in range(0, noParts):
 	
 	#Fair sanity checking
 	if (noPoints < 0):
+		print ("This part has an unreasonable number of points. (<0) File may be corrupt. Exiting!")
 		raise SystemExit
-	if (noPoints > 1000):
+	if (noPoints > 2000):
+		print ("This part has an unreasonable number of points. (>2000) File may be corrupt. Exiting!")
 		raise SystemExit
 		
 	for j in range(0, noPoints):
@@ -252,28 +263,35 @@ for i in range(0, noParts):
 		filecounter = readWord(filecounter)[0]
 		
 	print ("No. Vertices:", end = "\t")
-	temp = readWord(filecounter)
+	temp = readDword(filecounter)
 	filecounter = temp[0]
 	noPoints = temp[1]
 	
 	if (noPoints < 0):
+		print ("This part has an unreasonable number of points. (<0) File may be corrupt. Exiting!")
 		raise SystemExit
-	if (noPoints > 1000):
+	if (noPoints > 2000):
+		print ("This part has an unreasonable number of points. (>2000) File may be corrupt. Exiting!")
 		raise SystemExit
 	
 	for j in range(0, noPoints):
 		print ("Point no.", j+1)
 		
-		print ("Unk: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
 		print ("X: ", end = "\t")
 		filecounter = readWord(filecounter)[0]
 		print ("Y: ", end = "\t")
 		filecounter = readWord(filecounter)[0]
 		print ("Z: ", end = "\t")
 		filecounter = readWord(filecounter)[0]
-		print ("Unk: ", end = "\t")
-		filecounter = readWord(filecounter)[0]
+		
+		print ("R: ", end = "\t")
+		filecounter = readByte(filecounter)[0]
+		print ("G: ", end = "\t")
+		filecounter = readByte(filecounter)[0]
+		print ("B: ", end = "\t")
+		filecounter = readByte(filecounter)[0]
+		print ("Null: ", end = "\t")
+		filecounter = readByte(filecounter)[0]
 	print ("Unk: ", end = "\t")
 	filecounter = readWord(filecounter)[0]
 		
