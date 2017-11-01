@@ -1,7 +1,7 @@
 ##############################################################################
 ##                                                                          ##
 ## SRM2OBJ - Sonic R Model to Wavefront OBJ converter                       ##
-## (c) InvisibleUp 2014                                                     ##
+## (c) InvisibleUp 2014-2017                                                ##
 ## Special thanks to xdaniel on the Sonic Retro forums.                     ##
 ##                                                                          ##
 ##############################################################################
@@ -277,23 +277,23 @@ for a in range(0, len(VertexCounts)):
         
     for b in range(0, len(TriTex[a])):
         Out += "vt "
-        Out += str(TriTex[a][b][0] / 256) + " " +\
-            str(TriTex[a][b][1] / 256) + "\nvt " +\
-            str(TriTex[a][b][2] / 256) + " " + \
-            str(TriTex[a][b][3] / 256) + "\nvt " +\
-            str(TriTex[a][b][4] / 256) + " " +\
-            str(TriTex[a][b][5] / 256) + "\n"
+        Out += str((1 + TriTex[a][b][0]) / 256) + " " +\
+            str((256 - TriTex[a][b][1]) / 256) + "\nvt " +\
+            str((1 + TriTex[a][b][2]) / 256) + " " + \
+            str((256 - TriTex[a][b][3]) / 256) + "\nvt " +\
+            str((1 + TriTex[a][b][4]) / 256) + " " +\
+            str((256 - TriTex[a][b][5]) / 256) + "\n"
         
     for b in range(0, len(QuadTex[a])):
         Out += "vt "
-        Out += str(QuadTex[a][b][0] / 256) + " " +\
-            str(QuadTex[a][b][1] / 256) + "\nvt " +\
-            str(QuadTex[a][b][2] / 256) + " " + \
-            str(QuadTex[a][b][3] / 256) + "\nvt " +\
-            str(QuadTex[a][b][4] / 256) + " " +\
-            str(QuadTex[a][b][5] / 256) + "\nvt " +\
-            str(QuadTex[a][b][6] / 256) + " " + \
-            str(QuadTex[a][b][7] / 256) + "\n"
+        Out += str((1 + QuadTex[a][b][0]) / 256) + " " +\
+            str((256 - QuadTex[a][b][1]) / 256) + "\nvt " +\
+            str((1 + QuadTex[a][b][2]) / 256) + " " + \
+            str((256 - QuadTex[a][b][3]) / 256) + "\nvt " +\
+            str((1 + QuadTex[a][b][4]) / 256) + " " +\
+            str((256 - QuadTex[a][b][5]) / 256) + "\nvt " +\
+            str((1 + QuadTex[a][b][6]) / 256) + " " + \
+            str((256 - QuadTex[a][b][7]) / 256) + "\n"
         
     Out += "usemtl Texture\n"
     Out += "s off\n"
