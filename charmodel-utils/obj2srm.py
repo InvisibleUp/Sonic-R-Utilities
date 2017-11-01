@@ -1,7 +1,9 @@
+#!/usr/bin/python3
+
 ##############################################################################
 ##                                                                          ##
 ## OBJ2SRM - Wavefront OBJ to Sonic R model converter                       ##
-## (c) InvisibleUp 2014                                                     ##
+## (c) InvisibleUp 2014-2017                                                ##
 ## Special thanks to xdaniel on the Sonic Retro forums.                     ##
 ##                                                                          ##
 ##############################################################################
@@ -53,7 +55,7 @@ for line in objModel:
 	if line[0] == 'vt' : #textures
 		TexCoords.append([])
 		line[1] = int(float(line[1]) * 255)
-		TexCoords[-1].append(line[1] + 1)
+		TexCoords[-1].append(line[1])
 		line[2] = int(float(line[2]) * 255)
 		TexCoords[-1].append(abs(line[2] - 255))
 		
@@ -100,7 +102,7 @@ except OSError:
 
 	
 for i in range(0, len(Vertices)): # Part No.
-	SRMfile.write(pack('l', len(Vertices[i]))) # Vertex length
+	SRMfile.write(pack('i', len(Vertices[i]))) # Vertex length
 	for j in range(0, len(Vertices[i])):	# Write vertices
 		SRMfile.write(pack('h', int(Vertices[i][j][0])))
 		SRMfile.write(pack('h', int(Vertices[i][j][1])))
@@ -109,13 +111,13 @@ for i in range(0, len(Vertices)): # Part No.
 			SRMfile.write(pack('B', 0))
 		SRMfile.write(pack('B', 0x80))
 	
-	SRMfile.write(pack('l', len(Tris[i]))) # Triangle length
+	SRMfile.write(pack('i', len(Tris[i]))) # Triangle length
 	for j in range(0, len(Tris[i])):	# Write triangles
 		SRMfile.write(pack('h', int(Tris[i][j][0])))
 		SRMfile.write(pack('h', int(Tris[i][j][1])))
 		SRMfile.write(pack('h', int(Tris[i][j][2])))
 		if args.no_tex == True:
-			SRMfile.write(pack('hhh', 0, 0, 0))
+			SRMfile.write(pack('hhh', 0xFF, 0xFF, 0xFF))
 		else:
 		# Yes, I know this looks scary. Couldn't help it.
 			# TriTex[PART][TRI NO.][POINT NO.]
@@ -125,16 +127,16 @@ for i in range(0, len(Vertices)): # Part No.
 			SRMfile.write(pack('B', TexCoords[TriTex[i][j][1]][1]))
 			SRMfile.write(pack('B', TexCoords[TriTex[i][j][2]][0]))
 			SRMfile.write(pack('B', TexCoords[TriTex[i][j][2]][1]))
-		SRMfile.write(pack('l', 0))
+		SRMfile.write(pack('i', 0))
 		
-	SRMfile.write(pack('l', len(Quads[i]))) # Quad length
+	SRMfile.write(pack('i', len(Quads[i]))) # Quad length
 	for j in range(0, len(Quads[i])):	# Write quads
 		SRMfile.write(pack('h', int(Quads[i][j][0])))
 		SRMfile.write(pack('h', int(Quads[i][j][1])))
 		SRMfile.write(pack('h', int(Quads[i][j][2])))
 		SRMfile.write(pack('h', int(Quads[i][j][3])))
 		if args.no_tex == True:
-			SRMfile.write(pack('hhhh', 0, 0, 0, 0))
+			SRMfile.write(pack('hhhh', 0xFF, 0xFF, 0xFF, 0xFF))
 		else:
 			SRMfile.write(pack('B', int(TexCoords[QuadTex[i][j][0]][0])))
 			SRMfile.write(pack('B', int(TexCoords[QuadTex[i][j][0]][1])))
@@ -144,5 +146,5 @@ for i in range(0, len(Vertices)): # Part No.
 			SRMfile.write(pack('B', int(TexCoords[QuadTex[i][j][2]][1])))
 			SRMfile.write(pack('B', int(TexCoords[QuadTex[i][j][3]][0])))
 			SRMfile.write(pack('B', int(TexCoords[QuadTex[i][j][3]][1])))
-		SRMfile.write(pack('l', 0))
+		SRMfile.write(pack('i', 0))
 SRMfile.write(pack('l', -1))		
